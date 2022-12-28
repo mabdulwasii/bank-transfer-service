@@ -1,1 +1,45 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /
 
+spring:
+  application:
+    name: BankTransferService
+    api-key: a1b2c33d4e5f6g7h8i9jakblc
+  groovy:
+    template:
+      check-template-location: false
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        connection:
+          provider_disables_autocommit: false
+        id:
+          new_generator_mappings: true
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+    database: h2
+    defer-datasource-initialization: true
+
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:bts
+    username: sa
+    password: password
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 5
+  sql:
+    init:
+      continue-on-error: false
+      mode: always
+  h2:
+    console:
+      enabled: true
