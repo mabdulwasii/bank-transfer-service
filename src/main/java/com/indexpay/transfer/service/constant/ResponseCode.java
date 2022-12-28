@@ -10,11 +10,11 @@ public enum ResponseCode {
     ERROR("02", "An error occurred!");
 
     private final String code;
-    private final String message;
+    private final String description;
 
-    ResponseCode(String code, String message) {
+    ResponseCode(String code, String description) {
         this.code = code;
-        this.message = message;
+        this.description = description;
     }
 
 
