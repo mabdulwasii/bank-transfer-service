@@ -1,5 +1,6 @@
 package com.indexpay.transfer.security;
 
+import com.indexpay.transfer.utils.EncryptionUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +28,7 @@ public class SecurityConfig {
 
         filter.setAuthenticationManager(authentication -> {
             String suppliedApiKey = (String) authentication.getPrincipal();
-            if (!apiKey.equals(suppliedApiKey)) {
+            if (!Objects.equals(EncryptionUtil.encrypt(apiKey), suppliedApiKey)) {
                 throw new BadCredentialsException("Invalid api key.");
             }
             authentication.setAuthenticated(true);
