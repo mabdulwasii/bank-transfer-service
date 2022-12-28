@@ -16,16 +16,6 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: create-drop
-    properties:
-      hibernate:
-        connection:
-          provider_disables_autocommit: false
-        id:
-          new_generator_mappings: true
-        jdbc:
-          time_zone: UTC
-    open-in-view: false
-    database: h2
     defer-datasource-initialization: true
 
   datasource:
