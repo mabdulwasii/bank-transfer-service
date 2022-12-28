@@ -26,7 +26,7 @@ public class BankTransferService {
     public ApiResponse validateBankAccount(ValidateAccountRequest request) {
         String provider = Provider.ensureProviderIsValid(request.getProvider());
        request.setProvider(provider);
-
+        //Todo make a call to provider to validate account
         ValidateAccountResponse response = new ValidateAccountResponse("1111111111", "Adewale Johnson", "025", "Ecobank");
 
         return ApiResponse.successResponse(response);
@@ -34,14 +34,15 @@ public class BankTransferService {
     public ApiResponse transFerFund(BankTransferRequest request) {
         String provider = Provider.ensureProviderIsValid(request.getProvider());
         request.setProvider(provider);
-
+        //Todo make a call to provider for fund transfer
         BankTransferResponse response = new BankTransferResponse();
-
         return ApiResponse.successResponse(response);
     }
     public ApiResponse getTransactionStatus(String reference) {
         String provider = getTransactionProvider(reference);
-        return ApiResponse.successResponse(provider);
+        //Todo make a call to provider get transaction status
+        GetTransactionStatusResponse response = new GetTransactionStatusResponse();
+        return ApiResponse.successResponse(response);
     }
     private String getTransactionProvider(String reference) {
         TransactionLog transactionLog = transactionLogRepository.findByTransactionReference(reference);
@@ -49,5 +50,6 @@ public class BankTransferService {
             throw new InvalidTransactionReference("Invalid transaction reference");
         }
         return transactionLog.getProvider();
+
     }
 }
