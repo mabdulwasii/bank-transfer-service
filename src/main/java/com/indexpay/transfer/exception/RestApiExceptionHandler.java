@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
-
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error(" handleHttpMessageNotReadable ", ex);
@@ -51,7 +50,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     // Handle handleClientErrorException. Happens when request Entity is unprocessable.
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleClientErrorException(HttpClientErrorException ex) {
@@ -60,7 +58,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.UNPROCESSABLE_ENTITY);
     }
-
     // Handles IllegalArgumentException
     @ExceptionHandler(IllegalArgumentException.class)
     protected ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
@@ -69,7 +66,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     // Handles ResourceAccessException
     @ExceptionHandler(ResourceAccessException.class)
     protected ResponseEntity<Object> handleResourceAccessException(ResourceAccessException ex) {
@@ -78,7 +74,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.UNAUTHORIZED);
     }
-
     // Handles ConnectException
     // Handle ConnectException. Happens when request JSON is malformed.
     @ExceptionHandler(ConnectException.class)
@@ -88,7 +83,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.SERVICE_UNAVAILABLE);
     }
-
     // Handles AccessDeniedException
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
@@ -97,7 +91,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.UNAUTHORIZED);
     }
-
     // Handles IllegalStateException
     @ExceptionHandler(IllegalStateException.class)
     protected ResponseEntity<Object> handleIllegalException(IllegalStateException ex) {
@@ -106,7 +99,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     // Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
@@ -115,7 +107,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.NOT_FOUND);
     }
-
     //Handle MissingServletRequestParameterException. Triggered when a 'required' request parameter is missing.
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
@@ -126,7 +117,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     //  Handle HttpMediaTypeNotSupportedException. This one triggers when JSON is invalid.
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
@@ -141,7 +131,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         return buildResponseEntity(ResponseCode.ERROR.getCode(), builder.substring(0, builder.length() - 2), ex.getLocalizedMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
-
     // Handle MethodArgumentNotValidException. Triggered when an object fails @Valid validation.
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -160,7 +149,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), String.join("\n", errors).replace(",", ""), ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     //Handles javax.validation.ConstraintViolationException. Thrown when @Validated fails.
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolation(
@@ -184,7 +172,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     // Handle HttpMessageNotWritableException.
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -194,7 +181,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     //Handle NoHandlerFoundException.
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(
@@ -206,7 +192,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     //Handle MethodArgumentTypeMismatchException
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -216,7 +201,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage, ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
     }
-
     //Handle DataIntegrityViolationException, inspects the cause for different DB causes.
     @ExceptionHandler(DataIntegrityViolationException.class)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
@@ -229,7 +213,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(ResponseCode.ERROR.getCode(), "Invalid input data", ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST);
     }
-
     //Handle general exception
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAllException(Exception ex) {
@@ -240,7 +223,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
      //Handle throwable error
     @ExceptionHandler(Throwable.class)
     protected ResponseEntity<Object> handleAllException(Throwable ex) {
@@ -251,7 +233,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
     @ExceptionHandler(HttpServerErrorException.class)
     protected ResponseEntity<Object> handleHttpServerErrorException(HttpServerErrorException ex) {
         log.error("handleHttpServerErrorException ", ex);
@@ -260,7 +241,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
         log.error("handleBadCredentialsException ", ex);
@@ -269,7 +249,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.UNAUTHORIZED
         );
     }
-
     @ExceptionHandler(UsernameNotFoundException.class)
     protected ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         log.error("handleUsernameNotFoundException ", ex);
@@ -278,7 +257,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.UNAUTHORIZED
         );
     }
-
     @ExceptionHandler(InsufficientAuthenticationException.class)
     protected ResponseEntity<Object> handleAInsufficientAuthenticationException(InsufficientAuthenticationException ex) {
         log.error("handleAInsufficientAuthenticationException ", ex);
@@ -287,9 +265,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.UNAUTHORIZED
         );
     }
-
-
-
     @ExceptionHandler(NullPointerException.class)
     protected ResponseEntity<Object> handleNullPointerException(NullPointerException ex) {
         log.error("handleNullPointerException ", ex);
@@ -299,7 +274,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         );
 
     }
-
     @ExceptionHandler(NumberFormatException.class)
     protected ResponseEntity<Object> handleNumberFormatException(NumberFormatException ex) {
         log.error("handleNumberFormatException ", ex);
@@ -308,7 +282,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
     @ExceptionHandler(GenericException.class)
     protected ResponseEntity<Object> handleGenericException(GenericException ex) {
         log.error("handleGenericException ", ex);
@@ -317,8 +290,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
-
     @ExceptionHandler(InvalidEnumException.class)
     protected ResponseEntity<Object> handleInvalidEnumException(InvalidEnumException ex) {
         log.error("handleInvalidEnumException ", ex);
@@ -327,8 +298,14 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
-
+     @ExceptionHandler(InvalidTransactionReference.class)
+    protected ResponseEntity<Object> handleInvalidTransactionReference(InvalidTransactionReference ex) {
+        log.error("handleInvalidTransactionReference ", ex);
+        return buildResponseEntity(ResponseCode.ERROR.getCode(),
+                ex.getMessage(),
+                ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
+        );
+    }
     @ExceptionHandler(NonUniqueResultException.class)
     protected ResponseEntity<Object> handleNonUniqueResultException(NonUniqueResultException ex) {
         log.error("handleNonUniqueResultException ", ex);
@@ -337,7 +314,6 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(), HttpStatus.BAD_REQUEST
         );
     }
-
     @ExceptionHandler(SocketTimeoutException.class)
     protected ResponseEntity<Object> handleSocketTimeoutException(SocketTimeoutException ex) {
         log.error("handleNonUniqueResultException ", ex);
@@ -355,5 +331,4 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
         return new ResponseEntity<>(response, status);
     }
-
 }

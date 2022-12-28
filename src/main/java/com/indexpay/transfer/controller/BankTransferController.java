@@ -18,25 +18,28 @@ import javax.validation.Valid;
 @Slf4j
 public class BankTransferController {
     private final BankTransferService service;
-
     @GetMapping("/banks")
     public ResponseEntity<ApiResponse> getBanks(@RequestParam String provider){
         log.info("REST request to get banks via provider {}", provider);
         ApiResponse response = service.getBanks(provider);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
     @PostMapping("/validateBankAccount")
     public ResponseEntity<ApiResponse> validateBankAccount(@RequestBody @Valid ValidateAccountRequest request){
         log.info("REST request to validate bank number {}", request);
         ApiResponse response = service.validateBankAccount(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
     @PostMapping("/bankTransfer")
     public ResponseEntity<ApiResponse> transFerFund(@RequestBody @Valid BankTransferRequest request){
         log.info("REST request to transfer fund to an account {}", request);
         ApiResponse response = service.transFerFund(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @GetMapping("/transaction/{transactionReference}")
+    public ResponseEntity<ApiResponse> getTransactionStatus(@PathVariable String transactionReference){
+        log.info("REST request to get transaction status {}", transactionReference);
+        ApiResponse response = service.getTransactionStatus(transactionReference);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
