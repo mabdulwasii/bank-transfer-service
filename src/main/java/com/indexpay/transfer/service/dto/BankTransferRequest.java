@@ -5,11 +5,11 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class BankTransferRequest {
-    @NotEmpty(message = "Amount is mandatory")
+public class BankTransferRequest implements Serializable {
     @Min(value = 1, message = "Amount must be greater than 0")
     private BigDecimal amount;
     @NotEmpty(message = "Beneficiary account number is mandatory")

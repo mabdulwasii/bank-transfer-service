@@ -4,17 +4,13 @@ import com.indexpay.transfer.exception.InvalidEnumException;
 import org.springframework.util.StringUtils;
 
 public enum Provider {
-    PAYSTACK("paystack"),
-    FLUTTER_WAVE("flutterwave");
+    PAYSTACK,
+    FLUTTERWAVE;
 
-    private final String name;
-    Provider(String name) {
-        this.name = name;
-    }
     public static String ensureProviderIsValid(String provider) throws InvalidEnumException {
         if (!StringUtils.hasText(provider)) {
-            return Provider.PAYSTACK.name;
+            return Provider.PAYSTACK.name().toLowerCase();
         }
-        return Provider.valueOf(provider).name;
+        return Provider.valueOf(provider.toUpperCase()).name().toLowerCase();
     }
 }

@@ -8,41 +8,42 @@ import com.indexpay.transfer.repository.BankRepository;
 import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.dto.*;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class BankTransferService {
     private final BankRepository bankRepository;
     private final TransactionLogRepository transactionLogRepository;
-    public ApiResponse getBanks(String provider) {
+
+    private final TransferProducerService producer;
+    public List<Bank> getBanks(String provider) {
         provider = Provider.ensureProviderIsValid(provider);
-        List<Bank> bankByProvider = bankRepository.findBankByProvider(provider);
-        return ApiResponse.builder().code("00").description("bank retrieved successfully")
-                .data(bankByProvider).build();
+        return bankRepository.findBankByProvider(provider);
     }
-    public ApiResponse validateBankAccount(ValidateAccountRequest request) {
+    public ValidateAccountResponse validateBankAccount(ValidateAccountRequest request) {
         String provider = Provider.ensureProviderIsValid(request.getProvider());
        request.setProvider(provider);
+       log.info("Inside validate bank service");
         //Todo make a call to provider to validate account
-        ValidateAccountResponse response = new ValidateAccountResponse("1111111111", "Adewale Johnson", "025", "Ecobank");
-
-        return ApiResponse.successResponse(response);
+        return new ValidateAccountResponse("1234567891", "Adewale Johnson", "025", "Ecobank");
     }
-    public ApiResponse transFerFund(BankTransferRequest request) {
+    public BankTransferResponse transFerFund(BankTransferRequest request) {
         String provider = Provider.ensureProviderIsValid(request.getProvider());
         request.setProvider(provider);
         //Todo make a call to provider for fund transfer
-        BankTransferResponse response = new BankTransferResponse();
-        return ApiResponse.successResponse(response);
+        producer.send(request);
+        return new BankTransferResponse();
     }
-    public ApiResponse getTransactionStatus(String reference) {
+    public GetTransactionStatusResponse getTransactionStatus(String reference) {
         String provider = getTransactionProvider(reference);
         //Todo make a call to provider get transaction status
         GetTransactionStatusResponse response = new GetTransactionStatusResponse();
-        return ApiResponse.successResponse(response);
+        return response;
     }
     private String getTransactionProvider(String reference) {
         TransactionLog transactionLog = transactionLogRepository.findByTransactionReference(reference);
