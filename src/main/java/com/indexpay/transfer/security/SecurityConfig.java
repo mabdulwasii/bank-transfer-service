@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,11 +25,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthFilter filter = new AuthFilter();
-
         filter.setAuthenticationManager(authentication -> {
             String suppliedApiKey = (String) authentication.getPrincipal();
             if (!Objects.equals(EncryptionUtil.encrypt(apiKey), suppliedApiKey)) {
-                throw new BadCredentialsException("Invalid api key.");
+                throw new AccessDeniedException("Invalid api key.");
             }
             authentication.setAuthenticated(true);
             return authentication;

@@ -1,8 +1,7 @@
 server:
-  port: 8082
+  port: 8888
   servlet:
     context-path: /
-
 spring:
   application:
     name: BankTransferService
@@ -33,3 +32,9 @@ spring:
   h2:
     console:
       enabled: true
+  kafka:
+    transfer-topic: bankTransfer
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: group-id
+
