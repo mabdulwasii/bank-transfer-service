@@ -1,6 +1,5 @@
 package com.indexpay.transfer.controller;
 
-import com.indexpay.transfer.entity.Bank;
 import com.indexpay.transfer.service.BankTransferService;
 import com.indexpay.transfer.service.dto.*;
 import lombok.AllArgsConstructor;
@@ -19,9 +18,9 @@ import java.util.List;
 public class BankTransferController {
     private final BankTransferService service;
     @GetMapping("/banks")
-    public ResponseEntity<List<Bank>> getBanks(@RequestParam(required = false) String provider){
+    public ResponseEntity<List<BankDto>> getBanks(@RequestParam(required = false) String provider){
         log.info("REST request to get banks via provider {}", provider);
-        List<Bank> response = service.getBanks(provider);
+        List<BankDto> response = service.getBanks(provider);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping("/validateBankAccount")

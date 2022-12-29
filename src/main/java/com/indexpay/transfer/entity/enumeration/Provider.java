@@ -7,10 +7,10 @@ public enum Provider {
     PAYSTACK,
     FLUTTERWAVE;
 
-    public static String ensureProviderIsValid(String provider) throws InvalidEnumException {
+    public static Provider ensureProviderIsValid(String provider) throws InvalidEnumException {
         if (!StringUtils.hasText(provider)) {
-            return Provider.PAYSTACK.name().toLowerCase();
+            return Provider.PAYSTACK;
         }
-        return Provider.valueOf(provider.toUpperCase()).name().toLowerCase();
+        return Provider.valueOf(provider.toUpperCase());
     }
 }

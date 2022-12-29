@@ -3,7 +3,6 @@ package com.indexpay.transfer.config;
 import com.indexpay.transfer.service.dto.BankTransferRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -18,21 +17,21 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class TransferConsumerConfig {
-    @Value("${spring.kafka.transfer-topic}")
-    String transferTopic;
-    @Value(value = "${spring.kafka.bootstrap-servers}")
-    private String bootstrapAddress;
-     @Value(value = "${spring.kafka.consumer.group-id}")
-    private String groupId;
+    private final KafkaConfigProperties properties;
+
+    public TransferConsumerConfig(KafkaConfigProperties properties) {
+        this.properties = properties;
+    }
+
     @Bean
     public ConsumerFactory<String, BankTransferRequest> transferConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapAddress);
+                properties.getBootstrapServers());
         props.put(
                 ConsumerConfig.GROUP_ID_CONFIG,
-                groupId);
+                properties.getGroupId());
         return new DefaultKafkaConsumerFactory<>(props,
                 new StringDeserializer(),
                 new JsonDeserializer<>(BankTransferRequest.class));

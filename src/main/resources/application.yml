@@ -33,8 +33,13 @@ spring:
     console:
       enabled: true
   kafka:
-    transfer-topic: bankTransfer
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: group-id
+    transferTopic: bankTransfer
+    bootstrapServers: localhost:9092
+    groupId: group-id
 
+api:
+  paystack:
+    url: https://api.paystack.co
+    getBanks: /bank?currency=NGN
+    validateAccount: /bank/resolve
+    secretKey: sk_test_a3e6378f7d8e8d6c20ba8071a04145c2f06cb2b5

@@ -33,7 +33,7 @@ public class TransactionLog {
     @Min(value = 1, message = "Amount must be greater than 0")
     private BigDecimal amount;
     @Column(name = "currency_code", nullable = false)
-    private String currencyCode = "NGN";
+    private final String currencyCode = "NGN";
     @Column(name = "narration", nullable = false)
     @NotEmpty(message = "Narration is mandatory")
     private String narration;
