@@ -1,4 +1,4 @@
-package com.indexpay.transfer.client;
+package com.indexpay.transfer.client.paystack;
 
 
 import com.indexpay.transfer.exception.GenericException;
@@ -11,7 +11,6 @@ import java.util.Collections;
 
 @Component
 public class PaystackApiClient {
-
     private static final String AUTHORIZATION_HEADER="Authorization";
     private static final String TOKEN_TYPE = "Bearer ";
     public static final String ACCEPT_HEADER = "Accept";

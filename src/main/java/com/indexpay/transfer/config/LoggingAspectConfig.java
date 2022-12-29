@@ -8,7 +8,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableAspectJAutoProxy
-public class LoggingAspectConfiguration {
+public class LoggingAspectConfig {
     @Bean
     @Profile({"dev"})
     public LoggingAspect loggingAspect(Environment env) {

@@ -1,6 +1,6 @@
 package com.indexpay.transfer.service;
 
-import com.indexpay.transfer.client.PaystackApiClient;
+import com.indexpay.transfer.client.paystack.PaystackApiClient;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
 import com.indexpay.transfer.exception.GenericException;

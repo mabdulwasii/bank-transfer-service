@@ -1,4 +1,4 @@
-package com.indexpay.transfer.client;
+package com.indexpay.transfer.client.paystack;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
