@@ -41,16 +41,4 @@ public class EncryptionUtil {
         }
         return null;
     }
-
-    public static String decrypt(String strToDecrypt) {
-        try {
-            setKey(SECRET);
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
-        } catch (Exception e) {
-            log.error("Error while decrypting: ", e);
-        }
-        return null;
-    }
 }
