@@ -28,14 +28,12 @@ public class BankTransferService {
     public List<BankDto> getBanks(String provider) {
         Provider providerEnum = Provider.ensureProviderIsValid(provider);
         if (Provider.PAYSTACK.equals(providerEnum)) {
-            PaystackGetBanksResponse paystackGetBanksResponses = paystackClient.getBanks();
-            if(paystackGetBanksResponses.getStatus()) {
-                return DtoTransformer.transformToBankDto(paystackGetBanksResponses.getData());
+            PaystackGetBanksResponse response = paystackClient.getBanks();
+            if(response.getStatus()) {
+                return DtoTransformer.transformToBankDto(response.getData());
             }else {
-                throw new GenericException(paystackGetBanksResponses.getMessage());
+                throw new GenericException(response.getMessage());
             }
-
-
         }
         return null;
     }
