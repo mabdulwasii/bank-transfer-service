@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.indexpay.transfer.utils.AppConstants.AUTHORIZATION_HEADER;
+import static com.indexpay.transfer.utils.annotation.Utilities.ensureSuccessResponse;
 
 @Component
 @Slf4j
@@ -118,7 +119,8 @@ public class PaystackApiClient {
         throw new GenericException(responseBody.getMessage());
     }
 
-    private BankTransferResponse initiateTransfer(BankTransferRequest request, String recipientCode, TransactionLog transactionLog) {
+    @Transactional
+    public void initiateTransfer(BankTransferRequest request, String recipientCode, TransactionLog transactionLog) {
         InitiateTransferRequest transferRequest = new InitiateTransferRequest("balance",
                 request.getAmount().toString(), request.getTransactionReference(), recipientCode,
                 request.getNarration());
@@ -141,7 +143,6 @@ public class PaystackApiClient {
                 if (StringUtils.hasText(request.getCallBackUrl())) {
                     postToCallBackUrl(request.getCallBackUrl(), transferResponse );
                 }
-                return transferResponse;
             }
         }
         throw new GenericException(responseBody.getMessage());
@@ -184,14 +185,6 @@ public class PaystackApiClient {
             }
         }
         throw new GenericException(responseBody.getMessage());
-    }
-    private static void ensureSuccessResponse(HttpStatus statusCode, String message) throws IllegalArgumentException{
-        ensureSuccessResponse(HttpStatus.OK, statusCode, message);
-    }
-    private static void ensureSuccessResponse(HttpStatus expectedStatus,HttpStatus statusCode, String message) {
-        if (!expectedStatus.equals(statusCode)) {
-            throw new GenericException(message);
-        }
     }
 
     private String buildUrl(String path) {

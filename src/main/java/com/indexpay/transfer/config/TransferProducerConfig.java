@@ -1,5 +1,6 @@
 package com.indexpay.transfer.config;
 
+import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.service.dto.BankTransferRequest;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -44,8 +45,9 @@ public class TransferProducerConfig {
     public RetryTopicConfiguration retryTopic(KafkaTemplate<String, BankTransferRequest> template) {
         return RetryTopicConfigurationBuilder
                 .newInstance()
-                .exponentialBackoff(20000, 4, 50000)
+                .exponentialBackoff(2000, 5, 200000)
                 .maxAttempts(properties.getMaxAttempts())
+                .retryOn(GenericException.class)
                 .create(template);
     }
 }

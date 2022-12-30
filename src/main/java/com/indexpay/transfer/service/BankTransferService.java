@@ -1,5 +1,6 @@
 package com.indexpay.transfer.service;
 
+import com.indexpay.transfer.client.flutterwave.FlutterWaveClient;
 import com.indexpay.transfer.client.paystack.PaystackApiClient;
 import com.indexpay.transfer.config.KafkaConfigProperties;
 import com.indexpay.transfer.entity.TransactionLog;
@@ -23,16 +24,20 @@ public class BankTransferService {
     private final TransactionLogService transactionLogService;
 
     private final PaystackApiClient paystackClient;
+    private final FlutterWaveClient flutterWaveClient;
     private final KafkaConfigProperties properties;
 
     private final TransferProducerService producer;
+
     public List<BankDto> getBanks(String provider) {
         Provider providerEnum = Provider.ensureProviderIsValid(provider);
         if (Provider.PAYSTACK.equals(providerEnum)) {
             return paystackClient.getBanks();
+        }else {
+            return flutterWaveClient.getBanks();
         }
-        return null;
     }
+
     public ValidateAccountResponse validateBankAccount(ValidateAccountRequest request) {
         Provider provider = Provider.ensureProviderIsValid(request.getProvider());
         if (Provider.PAYSTACK.equals(provider)) {
@@ -40,6 +45,7 @@ public class BankTransferService {
         }
         return new ValidateAccountResponse("1234567891", "Adewale Johnson", "025", "Ecobank");
     }
+
     @Transactional
     public BankTransferResponse transFerFund(BankTransferRequest request) {
         Optional<TransactionLog> logOptional = transactionLogService.findByTransactionReference(request.getTransactionReference());
@@ -58,12 +64,13 @@ public class BankTransferService {
     public GetTransactionStatusResponse getTransactionStatus(String reference) {
         TransactionLog transactionLog = getTransactionLog(reference);
         String providerString = transactionLog.getProvider();
-        Provider provider  = Provider.valueOf(providerString);
+        Provider provider = Provider.valueOf(providerString);
         if (Provider.PAYSTACK.equals(provider)) {
             return paystackClient.getTransactionStatus(transactionLog.getExternalReference(), transactionLog);
         }
         return new GetTransactionStatusResponse();
     }
+
     private TransactionLog getTransactionLog(String reference) {
         Optional<TransactionLog> transactionLogOptional = transactionLogService.findByTransactionReference(reference);
         return transactionLogOptional.orElseThrow(() -> {
