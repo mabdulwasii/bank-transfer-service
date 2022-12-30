@@ -28,7 +28,6 @@ public class TransactionLog {
     @Column(name = "id", nullable = false)
     private Long id;
     @Column(name = "amount", nullable = false)
-    @NotEmpty(message = "Amount is mandatory")
     @Min(value = 1, message = "Amount must be greater than 0")
     private BigDecimal amount;
     @Column(name = "currency_code", nullable = false)

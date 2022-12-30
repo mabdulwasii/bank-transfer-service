@@ -9,6 +9,7 @@ public class KafkaConfigProperties {
     private String transferTopic;
     private String bootstrapServers;
     private String groupId;
+    private int maxAttempts;
 
     public String getTransferTopic() {
         return transferTopic;
@@ -32,5 +33,13 @@ public class KafkaConfigProperties {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public int getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 }

@@ -1,6 +1,8 @@
 package com.indexpay.transfer.client.paystack;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.repository.TransactionLogRepository;
@@ -12,13 +14,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import static com.indexpay.transfer.utils.AppConstants.AUTHORIZATION_HEADER;
 
@@ -78,11 +80,10 @@ public class PaystackApiClient {
         }
     }
 
-    public void fundTransfer(BankTransferRequest request) {
+    @Transactional
+    public void fundTransfer(BankTransferRequest request, TransactionLog transactionLog) {
+        log.info("Inside fund transfer method {} ", request);
         String recipientCode = createTransferRecipient(request);
-        Optional<TransactionLog> transactionLogOptional =
-                transactionLogRepository.findByTransactionReference(request.getTransactionReference());
-        TransactionLog transactionLog = transactionLogOptional.orElseThrow(PaystackApiClient::throwException);
         transactionLog.setRecipientCode(recipientCode);
         transactionLog = transactionLogRepository.save(transactionLog);
         initiateTransfer(request, recipientCode, transactionLog);
@@ -91,14 +92,19 @@ public class PaystackApiClient {
     public GetTransactionStatusResponse getTransactionStatus(String reference, TransactionLog transactionLog) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
+        ResponseEntity<String> responseString =
+                template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
+                        requestEntity, String.class, reference);
+        log.info("Paystack get transaction status response {} ", responseString);
+        ensureSuccessResponse(responseString.getStatusCode(), "Failed to get transaction status");
 
-        ResponseEntity<PaystackTransactionStatusResponse> response =
-                template.exchange(buildUrl(properties.getValidateAccount()), HttpMethod.GET,
-                        requestEntity, PaystackTransactionStatusResponse.class, reference);
-        log.info("Paystack get transaction status response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to get transaction status");
+        PaystackTransactionStatusResponse responseBody = null;
+        try {
+            responseBody = new ObjectMapper().readValue(responseString.getBody(), PaystackTransactionStatusResponse.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-        PaystackTransactionStatusResponse responseBody = response.getBody();
         if (responseBody == null) {
             throw new GenericException("Failed to retrieve list of banks");
         } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
@@ -179,7 +185,7 @@ public class PaystackApiClient {
         }
         throw new GenericException(responseBody.getMessage());
     }
-    private static void ensureSuccessResponse(HttpStatus statusCode, String message) {
+    private static void ensureSuccessResponse(HttpStatus statusCode, String message) throws IllegalArgumentException{
         ensureSuccessResponse(HttpStatus.OK, statusCode, message);
     }
     private static void ensureSuccessResponse(HttpStatus expectedStatus,HttpStatus statusCode, String message) {
@@ -198,7 +204,10 @@ public class PaystackApiClient {
         headers.add(AUTHORIZATION_HEADER, AppConstants.TOKEN_TYPE + properties.getSecretKey());
         return headers;
     }
-    private static RuntimeException throwException() {
-        throw new GenericException("Invalid transaction details");
+    @Transactional
+    public TransactionLog persistTransactionLog(BankTransferRequest request) {
+        TransactionLog transactionLog = DtoTransformer.transformToTransactionLog(request);
+        log.info("Persisting log {}", transactionLog );
+        return transactionLogRepository.save(transactionLog);
     }
 }

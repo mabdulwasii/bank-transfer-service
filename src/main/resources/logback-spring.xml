@@ -54,7 +54,7 @@
         <appender-ref ref="Console" />
     </logger>
 
-    <logger name="ch.qos.logback" level="DEBUG"/>
+    <logger name="ch.qos.logback" level="WARN"/>
     <logger name="io.undertow" level="DEBUG"/>
     <logger name="io.undertow.websockets.jsr" level="WARN"/>
     <logger name="org.apache" level="WARN"/>

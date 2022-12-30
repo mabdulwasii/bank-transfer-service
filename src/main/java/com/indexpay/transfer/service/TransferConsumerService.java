@@ -1,6 +1,7 @@
 package com.indexpay.transfer.service;
 
 import com.indexpay.transfer.client.paystack.PaystackApiClient;
+import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
 import com.indexpay.transfer.service.dto.BankTransferRequest;
 import lombok.AllArgsConstructor;
@@ -14,12 +15,14 @@ import org.springframework.stereotype.Service;
 public class TransferConsumerService {
 
     private final PaystackApiClient paystackClient;
-    @KafkaListener(topics = "${spring.kafka.transfer-topic}",
+
+    @KafkaListener(topics = "${spring.kafka.transferTopic}", groupId = "${spring.kafka.groupId}",
             containerFactory = "transferListenerContainerFactory")
     public void receive(BankTransferRequest request) {
         log.info("Transfer consumer receives {} ", request);
+        TransactionLog transactionLog = paystackClient.persistTransactionLog(request);
         if (Provider.PAYSTACK.equals(Provider.valueOf(request.getProvider()))) {
-            paystackClient.fundTransfer(request);
+            paystackClient.fundTransfer(request, transactionLog);
         }
     }
 }

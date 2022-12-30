@@ -36,6 +36,7 @@ public class TransferConsumerConfig {
                 new StringDeserializer(),
                 new JsonDeserializer<>(BankTransferRequest.class));
     }
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, BankTransferRequest>
     transferListenerContainerFactory() {

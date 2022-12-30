@@ -1,6 +1,7 @@
 package com.indexpay.transfer.service;
 
 import com.indexpay.transfer.client.paystack.PaystackApiClient;
+import com.indexpay.transfer.config.KafkaConfigProperties;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
 import com.indexpay.transfer.exception.GenericException;
@@ -23,6 +24,7 @@ public class BankTransferService {
     private final TransactionLogRepository transactionLogRepository;
 
     private final PaystackApiClient paystackClient;
+    private final KafkaConfigProperties properties;
 
     private final TransferProducerService producer;
     public List<BankDto> getBanks(String provider) {
@@ -45,8 +47,11 @@ public class BankTransferService {
         if (logOptional.isPresent()) {
             throw new NonUniqueReferenceException("Transaction reference not unique");
         }
-        Provider.ensureProviderIsValid(request.getProvider());
-        persistTransactionLog(request);
+        Provider provider = Provider.ensureProviderIsValid(request.getProvider());
+        request.setProvider(provider.name());
+        if (request.getMaxRetryAttempt() > 0) {
+            properties.setMaxAttempts(request.getMaxRetryAttempt());
+        }
         producer.send(request);
         return DtoTransformer.transformToBankTransferResponse(request);
     }
@@ -65,9 +70,5 @@ public class BankTransferService {
         return transactionLogOptional.orElseThrow(() -> {
             throw new GenericException("Invalid reference number : " + reference);
         });
-    }
-    private TransactionLog persistTransactionLog(BankTransferRequest request) {
-        TransactionLog transactionLog = DtoTransformer.transformToTransactionLog(request);
-        return transactionLogRepository.save(transactionLog);
     }
 }

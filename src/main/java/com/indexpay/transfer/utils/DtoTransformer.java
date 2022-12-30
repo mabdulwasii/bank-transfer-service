@@ -42,7 +42,7 @@ public class DtoTransformer {
                 .narration(request.getNarration())
                 .maxRetryAttempt(request.getMaxRetryAttempt())
                 .beneficiaryAccountNumber(request.getBeneficiaryAccountNumber())
-                .status(Status.CREATED.name().toLowerCase())
+                .status(Status.CREATED.name())
                 .provider(request.getProvider())
                 .transactionDateTime(LocalDateTime.now().toString())
                 .transactionReference(request.getTransactionReference())
