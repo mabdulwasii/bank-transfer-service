@@ -23,6 +23,6 @@ public class EnumValueValidatorConstraint implements ConstraintValidator<ValidEn
         if (value == null) {
             return true;
         }
-        return values.contains(value.toString());
+        return values.contains(value.toString().toUpperCase());
     }
 }

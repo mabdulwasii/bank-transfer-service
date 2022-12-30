@@ -6,7 +6,6 @@ import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
 import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.exception.NonUniqueReferenceException;
-import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.dto.*;
 import com.indexpay.transfer.utils.DtoTransformer;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class BankTransferService {
-    private final TransactionLogRepository transactionLogRepository;
+    private final TransactionLogService transactionLogService;
 
     private final PaystackApiClient paystackClient;
     private final KafkaConfigProperties properties;
@@ -43,7 +42,7 @@ public class BankTransferService {
     }
     @Transactional
     public BankTransferResponse transFerFund(BankTransferRequest request) {
-        Optional<TransactionLog> logOptional = transactionLogRepository.findByTransactionReference(request.getTransactionReference());
+        Optional<TransactionLog> logOptional = transactionLogService.findByTransactionReference(request.getTransactionReference());
         if (logOptional.isPresent()) {
             throw new NonUniqueReferenceException("Transaction reference not unique");
         }
@@ -66,7 +65,7 @@ public class BankTransferService {
         return new GetTransactionStatusResponse();
     }
     private TransactionLog getTransactionLog(String reference) {
-        Optional<TransactionLog> transactionLogOptional = transactionLogRepository.findByTransactionReference(reference);
+        Optional<TransactionLog> transactionLogOptional = transactionLogService.findByTransactionReference(reference);
         return transactionLogOptional.orElseThrow(() -> {
             throw new GenericException("Invalid reference number : " + reference);
         });
