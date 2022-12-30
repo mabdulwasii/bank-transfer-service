@@ -46,7 +46,7 @@ public class TransactionLog {
     @Column(name = "beneficiary_bank_code", nullable = false)
     @NotEmpty(message = "Beneficiary bank code is mandatory")
     private String beneficiaryBankCode;
-    @Column(name = "transaction_reference", nullable = false)
+    @Column(name = "transaction_reference", nullable = false, unique = true)
     @NotEmpty(message = "Transaction reference is mandatory")
     private String transactionReference;
     @Column(name = "external_reference")

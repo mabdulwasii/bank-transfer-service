@@ -10,7 +10,9 @@ import com.indexpay.transfer.utils.DtoTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -125,10 +127,23 @@ public class PaystackApiClient {
             InitiateTransferData data = responseBody.getData();
             if (data != null) {
                 finalTransactionLogUpdate(transactionLog, data);
-                return DtoTransformer.transformToBankTransferResponse(request, data);
+                BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(request, data);
+                if (StringUtils.hasText(request.getCallBackUrl())) {
+                    postToCallBackUrl(request.getCallBackUrl(), transferResponse );
+                }
+                return transferResponse;
             }
         }
         throw new GenericException(responseBody.getMessage());
+    }
+
+    @Async("taskExecutor")
+    public void postToCallBackUrl(String callBackUrl, BankTransferResponse bankTransferResponse) {
+        HttpEntity<BankTransferResponse> requestEntity = new HttpEntity<>(bankTransferResponse);
+        log.info("postToCallBackUrl entity {} {}", requestEntity, callBackUrl);
+        ResponseEntity<String> apiResponse = template.exchange(callBackUrl,
+                HttpMethod.POST, requestEntity, String.class);
+        log.info("Call back response for {} == {}", requestEntity, apiResponse);
     }
 
     private void finalTransactionLogUpdate(TransactionLog transactionLog, InitiateTransferData data) {
