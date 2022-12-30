@@ -3,12 +3,10 @@ package com.indexpay.transfer.service;
 import com.indexpay.transfer.client.paystack.PaystackApiClient;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
-import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.exception.InvalidTransactionReference;
 import com.indexpay.transfer.repository.BankRepository;
 import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.dto.*;
-import com.indexpay.transfer.utils.DtoTransformer;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,12 +26,7 @@ public class BankTransferService {
     public List<BankDto> getBanks(String provider) {
         Provider providerEnum = Provider.ensureProviderIsValid(provider);
         if (Provider.PAYSTACK.equals(providerEnum)) {
-            PaystackGetBanksResponse response = paystackClient.getBanks();
-            if(response.getStatus()) {
-                return DtoTransformer.transformToBankDto(response.getData());
-            }else {
-                throw new GenericException(response.getMessage());
-            }
+            return paystackClient.getBanks();
         }
         return null;
     }
