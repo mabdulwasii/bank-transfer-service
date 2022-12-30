@@ -3,6 +3,7 @@ package com.indexpay.transfer.client.paystack;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indexpay.transfer.entity.TransactionLog;
+import com.indexpay.transfer.entity.enumeration.Status;
 import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.TransactionLogService;
@@ -153,8 +154,9 @@ public class PaystackApiClient {
                 if (data != null) {
                     finalTransactionLogUpdate(transactionLog, data);
                     BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(transactionLog, data);
-                    if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
-                        postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse);
+                    if (StringUtils.hasText(transactionLog.getCallBackUrl())
+                            && Status.SUCCESS.name().equalsIgnoreCase(transactionLog.getStatus())) {
+                        postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse );
                     }
                 }
             }

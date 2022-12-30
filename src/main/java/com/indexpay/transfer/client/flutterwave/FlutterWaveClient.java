@@ -86,7 +86,8 @@ public class FlutterWaveClient {
                 if (data != null) {
                     finalTransactionLogUpdate(transactionLog, data);
                     BankTransferResponse transferResponse = DtoTransformer.transformToFlutterBankTransferResponse(transactionLog, data);
-                    if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
+                    if (StringUtils.hasText(transactionLog.getCallBackUrl())
+                            && Status.SUCCESS.name().equalsIgnoreCase(transactionLog.getStatus())) {
                         postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse);
                     }
                 }
@@ -100,10 +101,11 @@ public class FlutterWaveClient {
     public GetTransactionStatusResponse getTransactionStatus(TransactionLog transactionLog) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
+        log.info("transactionLog entity {}", transactionLog.getExternalReference());
         try {
             ResponseEntity<FlutterGetStatusResponse> response =
                     template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
-                            requestEntity, FlutterGetStatusResponse.class, transactionLog.getTransactionReference());
+                            requestEntity, FlutterGetStatusResponse.class, transactionLog.getExternalReference());
             log.info("flutter get transaction status response {} ", response);
             ensureSuccessResponse(response.getStatusCode(), "Failed to get transaction status");
             FlutterGetStatusResponse responseBody = response.getBody();
@@ -121,7 +123,6 @@ public class FlutterWaveClient {
             throw new GenericException(e.getMessage());
         }
         throw new GenericException("Failed to process request");
-
     }
 
     private String buildUrl(String path) {
@@ -138,6 +139,7 @@ public class FlutterWaveClient {
     @Transactional
     public void finalTransactionLogUpdate(TransactionLog transactionLog, FlutterTransferResponseData data) {
         transactionLog.setSessionId(UUID.randomUUID().toString());
+        transactionLog.setExternalReference(String.valueOf(data.getId()));
         String status = data.getStatus();
         if (status.equalsIgnoreCase("NEW")){
             status = Status.PENDING.name();
