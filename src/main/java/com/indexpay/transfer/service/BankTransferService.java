@@ -5,7 +5,6 @@ import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
 import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.exception.NonUniqueReferenceException;
-import com.indexpay.transfer.repository.BankRepository;
 import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.dto.*;
 import com.indexpay.transfer.utils.DtoTransformer;
@@ -21,7 +20,6 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class BankTransferService {
-    private final BankRepository bankRepository;
     private final TransactionLogRepository transactionLogRepository;
 
     private final PaystackApiClient paystackClient;
