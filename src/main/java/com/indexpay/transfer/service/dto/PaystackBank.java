@@ -1,8 +1,8 @@
 package com.indexpay.transfer.service.dto;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-        import com.fasterxml.jackson.annotation.JsonProperty;
-        import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -21,7 +21,6 @@ import lombok.Builder;
         "createdAt",
         "updatedAt"
 })
-@Builder
 public class PaystackBank {
     @JsonProperty("id")
     private Integer id;
