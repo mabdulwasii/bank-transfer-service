@@ -49,7 +49,8 @@ public class DtoTransformer {
                 .build();
     }
 
-    public static BankTransferResponse transformToBankTransferResponse(BankTransferRequest request, InitiateTransferData data) {
+    public static BankTransferResponse transformToBankTransferResponse(BankTransferRequest request,
+                                                                       InitiateTransferData data) {
         return BankTransferResponse.builder()
                 .amount(request.getAmount())
                 .beneficiaryAccountNumber(request.getBeneficiaryAccountNumber())
@@ -62,6 +63,20 @@ public class DtoTransformer {
                 .transactionDateTime(data.getCreatedAt())
                 .transactionReference(data.getReference())
                 .status(data.getStatus().toUpperCase())
+                .build();
+    }
+    public static BankTransferResponse transformToBankTransferResponse(BankTransferRequest request) {
+        return BankTransferResponse.builder()
+                .amount(request.getAmount())
+                .beneficiaryAccountNumber(request.getBeneficiaryAccountNumber())
+                .beneficiaryBankCode(request.getBeneficiaryBankCode())
+                .currencyCode(request.getCurrencyCode())
+                .responseCode(ResponseCode.SUCCESS.getCode())
+                .responseMessage(AppConstants.SUCCESS_TRANSFER)
+                .beneficiaryAccountName(request.getBeneficiaryAccountName())
+                .transactionDateTime(LocalDateTime.now().toString())
+                .transactionReference(request.getTransactionReference())
+                .status(Status.CREATED.name())
                 .build();
     }
 }

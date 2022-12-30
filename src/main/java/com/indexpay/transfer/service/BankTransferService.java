@@ -45,13 +45,10 @@ public class BankTransferService {
         if (logOptional.isPresent()) {
             throw new NonUniqueReferenceException("Transaction reference not unique");
         }
-        Provider provider = Provider.ensureProviderIsValid(request.getProvider());
-        TransactionLog savedTransactionLog = persistTransactionLog(request);
-        if (Provider.PAYSTACK.equals(provider)) {
-            return paystackClient.transFerFund(request, savedTransactionLog);
-        }
+        Provider.ensureProviderIsValid(request.getProvider());
+        persistTransactionLog(request);
         producer.send(request);
-        return BankTransferResponse.builder().build();
+        return DtoTransformer.transformToBankTransferResponse(request);
     }
 
     public GetTransactionStatusResponse getTransactionStatus(String reference) {

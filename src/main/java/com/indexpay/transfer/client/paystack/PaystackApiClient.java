@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static com.indexpay.transfer.utils.AppConstants.AUTHORIZATION_HEADER;
 
@@ -77,11 +78,14 @@ public class PaystackApiClient {
         }
     }
 
-    public BankTransferResponse transFerFund(BankTransferRequest request, TransactionLog transactionLog) {
+    public void transFerFund(BankTransferRequest request) {
         String recipientCode = createTransferRecipient(request);
+        Optional<TransactionLog> transactionLogOptional =
+                transactionLogRepository.findByTransactionReference(request.getTransactionReference());
+        TransactionLog transactionLog = transactionLogOptional.orElseThrow(PaystackApiClient::throwException);
         transactionLog.setRecipientCode(recipientCode);
         transactionLog = transactionLogRepository.save(transactionLog);
-        return initiateTransfer(request, recipientCode, transactionLog);
+        initiateTransfer(request, recipientCode, transactionLog);
     }
 
     public GetTransactionStatusResponse getTransactionStatus(String reference, TransactionLog transactionLog) {
@@ -193,5 +197,8 @@ public class PaystackApiClient {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add(AUTHORIZATION_HEADER, AppConstants.TOKEN_TYPE + properties.getSecretKey());
         return headers;
+    }
+    private static RuntimeException throwException() {
+        throw new GenericException("Invalid transaction details");
     }
 }
