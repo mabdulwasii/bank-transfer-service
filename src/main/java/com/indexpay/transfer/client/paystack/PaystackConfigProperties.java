@@ -9,6 +9,9 @@ public class PaystackConfigProperties {
     private String url;
     private String getBanks;
     private String validateAccount;
+    private String transferRecipient;
+    private String transfer;
+    private String verifyTransfer;
     private String secretKey;
 
     public String getUrl() {
@@ -33,6 +36,30 @@ public class PaystackConfigProperties {
 
     public void setValidateAccount(String validateAccount) {
         this.validateAccount = validateAccount;
+    }
+
+    public String getTransferRecipient() {
+        return transferRecipient;
+    }
+
+    public void setTransferRecipient(String transferRecipient) {
+        this.transferRecipient = transferRecipient;
+    }
+
+    public String getTransfer() {
+        return transfer;
+    }
+
+    public void setTransfer(String transfer) {
+        this.transfer = transfer;
+    }
+
+    public String getVerifyTransfer() {
+        return verifyTransfer;
+    }
+
+    public void setVerifyTransfer(String verifyTransfer) {
+        this.verifyTransfer = verifyTransfer;
     }
 
     public String getSecretKey() {

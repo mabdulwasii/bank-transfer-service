@@ -1,12 +1,17 @@
 package com.indexpay.transfer.service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class GetTransactionStatusResponse {
     @NotEmpty(message = "Amount is mandatory")
     @Min(value = 1, message = "Amount must be greater than 0")
@@ -21,7 +26,7 @@ public class GetTransactionStatusResponse {
     @NotEmpty(message = "Transaction reference is mandatory")
     private String transactionReference;
     @NotNull(message = "Transaction date cannot be empty")
-    private LocalDateTime transactionDateTime;
+    private String transactionDateTime;
     private String currencyCode = "NGN";
     @NotEmpty(message = "Response message is mandatory")
     private String responseMessage;

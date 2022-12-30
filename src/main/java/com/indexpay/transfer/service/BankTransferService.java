@@ -3,15 +3,19 @@ package com.indexpay.transfer.service;
 import com.indexpay.transfer.client.paystack.PaystackApiClient;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.entity.enumeration.Provider;
-import com.indexpay.transfer.exception.InvalidTransactionReference;
+import com.indexpay.transfer.exception.GenericException;
+import com.indexpay.transfer.exception.NonUniqueReferenceException;
 import com.indexpay.transfer.repository.BankRepository;
 import com.indexpay.transfer.repository.TransactionLogRepository;
 import com.indexpay.transfer.service.dto.*;
+import com.indexpay.transfer.utils.DtoTransformer;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -37,25 +41,38 @@ public class BankTransferService {
         }
         return new ValidateAccountResponse("1234567891", "Adewale Johnson", "025", "Ecobank");
     }
+    @Transactional
     public BankTransferResponse transFerFund(BankTransferRequest request) {
-        Provider provider = Provider.ensureProviderIsValid(request.getProvider());
-        request.setProvider(provider.name().toLowerCase());
-        //Todo make a call to provider for fund transfer
-        producer.send(request);
-        return new BankTransferResponse();
-    }
-    public GetTransactionStatusResponse getTransactionStatus(String reference) {
-        String providerString = getTransactionProvider(reference);
-        Provider provider = Provider.valueOf(providerString);
-        //Todo make a call to provider get transaction status
-        GetTransactionStatusResponse response = new GetTransactionStatusResponse();
-        return response;
-    }
-    private String getTransactionProvider(String reference) {
-        TransactionLog transactionLog = transactionLogRepository.findByTransactionReference(reference);
-        if (transactionLog == null) {
-            throw new InvalidTransactionReference("Invalid transaction reference");
+        Optional<TransactionLog> logOptional = transactionLogRepository.findByTransactionReference(request.getTransactionReference());
+        if (logOptional.isPresent()) {
+            throw new NonUniqueReferenceException("Transaction reference not unique");
         }
-        return transactionLog.getProvider();
+        Provider provider = Provider.ensureProviderIsValid(request.getProvider());
+        TransactionLog savedTransactionLog = persistTransactionLog(request);
+        if (Provider.PAYSTACK.equals(provider)) {
+            return paystackClient.transFerFund(request, savedTransactionLog);
+        }
+        producer.send(request);
+        return BankTransferResponse.builder().build();
+    }
+
+    public GetTransactionStatusResponse getTransactionStatus(String reference) {
+        TransactionLog transactionLog = getTransactionLog(reference);
+        String providerString = transactionLog.getProvider();
+        Provider provider  = Provider.valueOf(providerString);
+        if (Provider.PAYSTACK.equals(provider)) {
+            return paystackClient.getTransactionStatus(transactionLog.getExternalReference(), transactionLog);
+        }
+        return new GetTransactionStatusResponse();
+    }
+    private TransactionLog getTransactionLog(String reference) {
+        Optional<TransactionLog> transactionLogOptional = transactionLogRepository.findByTransactionReference(reference);
+        return transactionLogOptional.orElseThrow(() -> {
+            throw new GenericException("Invalid reference number : " + reference);
+        });
+    }
+    private TransactionLog persistTransactionLog(BankTransferRequest request) {
+        TransactionLog transactionLog = DtoTransformer.transformToTransactionLog(request);
+        return transactionLogRepository.save(transactionLog);
     }
 }

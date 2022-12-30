@@ -11,7 +11,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -50,6 +49,8 @@ public class TransactionLog {
     @Column(name = "transaction_reference", nullable = false)
     @NotEmpty(message = "Transaction reference is mandatory")
     private String transactionReference;
+    @Column(name = "external_reference")
+    private String externalReference;
     @Column(name = "max_retry", nullable = false)
     private int maxRetryAttempt;
     @Column(name = "callback_url")
@@ -64,5 +65,7 @@ public class TransactionLog {
     private String sessionId;
     @Column(name = "transaction_time", nullable = false)
     @NotNull(message = "Transaction date cannot be empty")
-    private LocalDateTime transactionDateTime;
+    private String transactionDateTime;
+    @Column(name = "recipient_code")
+    private String recipientCode;
 }
