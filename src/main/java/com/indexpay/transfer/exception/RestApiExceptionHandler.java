@@ -50,8 +50,7 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleClientErrorException(HttpClientErrorException ex) {
         log.error(" handleClientErrorException ", ex);
-        String errorMessage = "Request entity unprocessable";
-        return buildResponseEntity(ResponseCode.ERROR.getCode(), errorMessage,
+        return buildResponseEntity(ResponseCode.ERROR.getCode(), String.valueOf(ex.getLocalizedMessage()),
                 HttpStatus.UNPROCESSABLE_ENTITY);
     }
 

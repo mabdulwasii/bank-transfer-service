@@ -11,12 +11,8 @@ import java.util.List;
         "data"
 })
 public class PaystackGetBanksResponse extends PaystackApiResponse {
-
     @JsonProperty("data")
     private List<PaystackBank> data = null;
-
-
-
     @JsonProperty("data")
     public List<PaystackBank> getData() {
         return data;

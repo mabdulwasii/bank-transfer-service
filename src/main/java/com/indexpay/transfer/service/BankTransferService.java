@@ -32,6 +32,9 @@ public class BankTransferService {
     }
     public ValidateAccountResponse validateBankAccount(ValidateAccountRequest request) {
         Provider provider = Provider.ensureProviderIsValid(request.getProvider());
+        if (Provider.PAYSTACK.equals(provider)) {
+            return paystackClient.validateBankAccount(request);
+        }
         return new ValidateAccountResponse("1234567891", "Adewale Johnson", "025", "Ecobank");
     }
     public BankTransferResponse transFerFund(BankTransferRequest request) {
