@@ -52,20 +52,20 @@ public class DtoTransformer {
                 .build();
     }
 
-    public static BankTransferResponse transformToBankTransferResponse(BankTransferRequest request,
+    public static BankTransferResponse transformToBankTransferResponse(TransactionLog transactionLog,
                                                                        InitiateTransferData data) {
         return BankTransferResponse.builder()
-                .amount(request.getAmount())
-                .beneficiaryAccountNumber(request.getBeneficiaryAccountNumber())
-                .beneficiaryBankCode(request.getBeneficiaryBankCode())
+                .amount(transactionLog.getAmount())
+                .beneficiaryAccountNumber(transactionLog.getBeneficiaryAccountNumber())
+                .beneficiaryBankCode(transactionLog.getBeneficiaryBankCode())
                 .currencyCode(data.getCurrency())
                 .responseCode(ResponseCode.SUCCESS.getCode())
                 .responseMessage(AppConstants.SUCCESS_TRANSFER)
                 .sessionId(data.getTransferCode())
-                .beneficiaryAccountName(request.getBeneficiaryAccountName())
+                .beneficiaryAccountName(transactionLog.getBeneficiaryAccountName())
                 .transactionDateTime(data.getCreatedAt())
                 .transactionReference(data.getReference())
-                .status(data.getStatus().toUpperCase())
+                .status(transactionLog.getStatus())
                 .build();
     }
     public static BankTransferResponse transformToBankTransferResponse(BankTransferRequest request) {
@@ -80,6 +80,22 @@ public class DtoTransformer {
                 .transactionDateTime(LocalDateTime.now().toString())
                 .transactionReference(request.getTransactionReference())
                 .status(Status.CREATED.name())
+                .build();
+    }
+
+    public static BankTransferResponse transformToFlutterBankTransferResponse(TransactionLog transactionLog, FlutterTransferResponseData data) {
+        return BankTransferResponse.builder()
+                .amount(transactionLog.getAmount())
+                .beneficiaryAccountNumber(transactionLog.getBeneficiaryAccountNumber())
+                .beneficiaryBankCode(transactionLog.getBeneficiaryBankCode())
+                .currencyCode(data.getCurrency())
+                .responseCode(ResponseCode.SUCCESS.getCode())
+                .responseMessage(AppConstants.SUCCESS_TRANSFER)
+                .sessionId(transactionLog.getSessionId())
+                .beneficiaryAccountName(transactionLog.getBeneficiaryAccountName())
+                .transactionDateTime(data.getCreatedAt())
+                .transactionReference(data.getReference())
+                .status(transactionLog.getStatus())
                 .build();
     }
 }

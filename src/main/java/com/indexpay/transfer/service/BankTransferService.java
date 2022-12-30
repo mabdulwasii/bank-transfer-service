@@ -42,8 +42,9 @@ public class BankTransferService {
         Provider provider = Provider.ensureProviderIsValid(request.getProvider());
         if (Provider.PAYSTACK.equals(provider)) {
             return paystackClient.validateBankAccount(request);
+        }else {
+            throw new GenericException("Service not available for provider " + request.getProvider());
         }
-        return new ValidateAccountResponse("1234567891", "Adewale Johnson", "025", "Ecobank");
     }
 
     @Transactional
@@ -66,9 +67,10 @@ public class BankTransferService {
         String providerString = transactionLog.getProvider();
         Provider provider = Provider.valueOf(providerString);
         if (Provider.PAYSTACK.equals(provider)) {
-            return paystackClient.getTransactionStatus(transactionLog.getExternalReference(), transactionLog);
+            return paystackClient.getTransactionStatus(transactionLog);
+        }else {
+            return flutterWaveClient.getTransactionStatus(transactionLog);
         }
-        return new GetTransactionStatusResponse();
     }
 
     private TransactionLog getTransactionLog(String reference) {

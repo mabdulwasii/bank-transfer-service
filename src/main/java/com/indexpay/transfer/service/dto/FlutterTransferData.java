@@ -3,7 +3,10 @@ package com.indexpay.transfer.service.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Builder;
 import lombok.ToString;
+
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -17,6 +20,7 @@ import lombok.ToString;
         "debit_currency"
 })
 @ToString
+@Builder
 public class FlutterTransferData {
 
     @JsonProperty("account_bank")
@@ -24,7 +28,7 @@ public class FlutterTransferData {
     @JsonProperty("account_number")
     private String accountNumber;
     @JsonProperty("amount")
-    private Integer amount;
+    private BigDecimal amount;
     @JsonProperty("narration")
     private String narration;
     @JsonProperty("currency")
@@ -57,12 +61,12 @@ public class FlutterTransferData {
     }
 
     @JsonProperty("amount")
-    public Integer getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
     @JsonProperty("amount")
-    public void setAmount(Integer amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

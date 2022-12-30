@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.exception.GenericException;
 import com.indexpay.transfer.repository.TransactionLogRepository;
+import com.indexpay.transfer.service.TransactionLogService;
 import com.indexpay.transfer.service.dto.*;
 import com.indexpay.transfer.utils.AppConstants;
 import com.indexpay.transfer.utils.DtoTransformer;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
@@ -27,16 +29,12 @@ import static com.indexpay.transfer.utils.annotation.Utilities.ensureSuccessResp
 
 @Component
 @Slf4j
+@AllArgsConstructor
 public class PaystackApiClient {
+    private final TransactionLogRepository transactionLogRepository;
     private final PaystackConfigProperties properties;
     private final RestTemplate template;
-    private final TransactionLogRepository transactionLogRepository;
-
-    public PaystackApiClient(PaystackConfigProperties properties, RestTemplate template, TransactionLogRepository transactionLogRepository) {
-        this.properties = properties;
-        this.template = template;
-        this.transactionLogRepository = transactionLogRepository;
-    }
+    private final TransactionLogService transactionLogService;
 
     @Cacheable(value = "banks")
     public List<BankDto> getBanks() {
@@ -82,20 +80,21 @@ public class PaystackApiClient {
     }
 
     @Transactional
-    public void fundTransfer(BankTransferRequest request, TransactionLog transactionLog) {
-        log.info("Inside fund transfer method {} ", request);
-        String recipientCode = createTransferRecipient(request);
+    public void fundTransfer(TransactionLog transactionLog) {
+        log.info("Inside fund transfer method {} ", transactionLog);
+        String recipientCode = createTransferRecipient(transactionLog);
         transactionLog.setRecipientCode(recipientCode);
-        transactionLog = transactionLogRepository.save(transactionLog);
-        initiateTransfer(request, recipientCode, transactionLog);
+        transactionLog = transactionLogService.save(transactionLog);
+        initiateTransfer(recipientCode, transactionLog);
     }
 
-    public GetTransactionStatusResponse getTransactionStatus(String reference, TransactionLog transactionLog) {
+    @Transactional
+    public GetTransactionStatusResponse getTransactionStatus(TransactionLog transactionLog) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
         ResponseEntity<String> responseString =
                 template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
-                        requestEntity, String.class, reference);
+                        requestEntity, String.class, transactionLog.getTransactionReference());
         log.info("Paystack get transaction status response {} ", responseString);
         ensureSuccessResponse(responseString.getStatusCode(), "Failed to get transaction status");
 
@@ -112,7 +111,7 @@ public class PaystackApiClient {
             PaystackTransactionStatusData data = responseBody.getData();
             if (data != null) {
                 transactionLog.setStatus(data.getStatus());
-                transactionLog = transactionLogRepository.save(transactionLog);
+                transactionLog = transactionLogService.save(transactionLog);
                 return DtoTransformer.transformToStatusResponse(transactionLog);
             }
         }
@@ -120,10 +119,10 @@ public class PaystackApiClient {
     }
 
     @Transactional
-    public void initiateTransfer(BankTransferRequest request, String recipientCode, TransactionLog transactionLog) {
+    public void initiateTransfer(String recipientCode, TransactionLog transactionLog) {
         InitiateTransferRequest transferRequest = new InitiateTransferRequest("balance",
-                request.getAmount().toString(), request.getTransactionReference(), recipientCode,
-                request.getNarration());
+                transactionLog.getAmount().toString(), transactionLog.getTransactionReference(), recipientCode,
+                transactionLog.getNarration());
         HttpEntity<InitiateTransferRequest> requestEntity = new HttpEntity<>(transferRequest, getHeaders());
         log.info("initiateTransfer entity {}", requestEntity);
         ResponseEntity<InitiateTransferResponse> response = template.exchange(buildUrl(properties.getTransfer()),
@@ -139,9 +138,9 @@ public class PaystackApiClient {
             InitiateTransferData data = responseBody.getData();
             if (data != null) {
                 finalTransactionLogUpdate(transactionLog, data);
-                BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(request, data);
-                if (StringUtils.hasText(request.getCallBackUrl())) {
-                    postToCallBackUrl(request.getCallBackUrl(), transferResponse );
+                BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(transactionLog, data);
+                if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
+                    postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse );
                 }
             }
         }
@@ -157,17 +156,18 @@ public class PaystackApiClient {
         log.info("Call back response for {} == {}", requestEntity, apiResponse);
     }
 
-    private void finalTransactionLogUpdate(TransactionLog transactionLog, InitiateTransferData data) {
+    @Transactional
+    public void finalTransactionLogUpdate(TransactionLog transactionLog, InitiateTransferData data) {
         transactionLog.setSessionId(data.getTransferCode());
         transactionLog.setStatus(data.getStatus());
-        transactionLogRepository.save(transactionLog);
+        transactionLogService.save(transactionLog);
         log.info("Updated transaction log {} ", transactionLog);
     }
 
-    private String createTransferRecipient(BankTransferRequest request) {
+    private String createTransferRecipient(TransactionLog transactionLog) {
         TransferRecipientRequest recipientRequest = new TransferRecipientRequest("nuban",
-                request.getBeneficiaryAccountName(), request.getBeneficiaryAccountNumber(),
-                request.getBeneficiaryBankCode(), request.getCurrencyCode());
+                transactionLog.getBeneficiaryAccountName(), transactionLog.getBeneficiaryAccountNumber(),
+                transactionLog.getBeneficiaryBankCode(), transactionLog.getCurrencyCode());
         HttpEntity<TransferRecipientRequest> requestEntity = new HttpEntity<>(recipientRequest, getHeaders());
         log.info("getTransferRecipient entity {}", requestEntity);
         ResponseEntity<TransferRecipientResponse> response = template.exchange(buildUrl(properties.getTransferRecipient()),
@@ -201,6 +201,6 @@ public class PaystackApiClient {
     public TransactionLog persistTransactionLog(BankTransferRequest request) {
         TransactionLog transactionLog = DtoTransformer.transformToTransactionLog(request);
         log.info("Persisting log {}", transactionLog );
-        return transactionLogRepository.save(transactionLog);
+        return transactionLogService.save(transactionLog);
     }
 }
