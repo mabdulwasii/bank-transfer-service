@@ -78,7 +78,7 @@ public class PaystackApiClient {
         }
     }
 
-    public void transFerFund(BankTransferRequest request) {
+    public void fundTransfer(BankTransferRequest request) {
         String recipientCode = createTransferRecipient(request);
         Optional<TransactionLog> transactionLogOptional =
                 transactionLogRepository.findByTransactionReference(request.getTransactionReference());

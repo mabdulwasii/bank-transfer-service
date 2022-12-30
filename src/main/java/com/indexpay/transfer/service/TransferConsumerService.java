@@ -19,7 +19,7 @@ public class TransferConsumerService {
     public void receive(BankTransferRequest request) {
         log.info("Transfer consumer receives {} ", request);
         if (Provider.PAYSTACK.equals(Provider.valueOf(request.getProvider()))) {
-            paystackClient.transFerFund(request);
+            paystackClient.fundTransfer(request);
         }
     }
 }
