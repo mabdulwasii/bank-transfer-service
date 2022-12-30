@@ -42,4 +42,7 @@ api:
     url: https://api.paystack.co
     getBanks: /bank?currency=NGN
     validateAccount: /bank/resolve?account_number={account_number}&bank_code={bank_code}
+    transferRecipient: /transferrecipient
+    transfer: /transfer
+    verifyTransfer: /transfer/{id_or_code}
     secretKey: sk_test_a3e6378f7d8e8d6c20ba8071a04145c2f06cb2b5
