@@ -1,7 +1,6 @@
 package com.indexpay.transfer.client.paystack;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indexpay.transfer.entity.TransactionLog;
 import com.indexpay.transfer.exception.GenericException;
@@ -40,18 +39,23 @@ public class PaystackApiClient {
     public List<BankDto> getBanks() {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
-        ResponseEntity<PaystackGetBanksResponse> response =
-                template.exchange(buildUrl(properties.getGetBanks()), HttpMethod.GET,
-                        requestEntity, PaystackGetBanksResponse.class);
-        log.info("Paystack get bank list response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to retrieve list of banks");
-        PaystackGetBanksResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
-            return DtoTransformer.transformToBankDto(responseBody.getData());
-        } else {
-            throw new GenericException(responseBody.getMessage());
+        try {
+            ResponseEntity<PaystackGetBanksResponse> response =
+                    template.exchange(buildUrl(properties.getGetBanks()), HttpMethod.GET,
+                            requestEntity, PaystackGetBanksResponse.class);
+            log.info("Paystack get bank list response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to retrieve list of banks");
+            PaystackGetBanksResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
+                return DtoTransformer.transformToBankDto(responseBody.getData());
+            } else {
+                throw new GenericException(responseBody.getMessage());
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e.getMessage());
         }
     }
 
@@ -63,19 +67,24 @@ public class PaystackApiClient {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
 
-        ResponseEntity<PaystackValidateResponse> response =
-                template.exchange(buildUrl(properties.getValidateAccount()), HttpMethod.GET,
-                        requestEntity, PaystackValidateResponse.class, params);
-        log.info("Paystack validate Account response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to validate bank account");
+        try {
+            ResponseEntity<PaystackValidateResponse> response =
+                    template.exchange(buildUrl(properties.getValidateAccount()), HttpMethod.GET,
+                            requestEntity, PaystackValidateResponse.class, params);
+            log.info("Paystack validate Account response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to validate bank account");
 
-        PaystackValidateResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
-            return DtoTransformer.transformToValidateResponse(responseBody.getData(), request);
-        } else {
-            throw new GenericException(responseBody.getMessage());
+            PaystackValidateResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
+                return DtoTransformer.transformToValidateResponse(responseBody.getData(), request);
+            } else {
+                throw new GenericException(responseBody.getMessage());
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e.getMessage());
         }
     }
 
@@ -92,30 +101,34 @@ public class PaystackApiClient {
     public GetTransactionStatusResponse getTransactionStatus(TransactionLog transactionLog) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
-        ResponseEntity<String> responseString =
-                template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
-                        requestEntity, String.class, transactionLog.getTransactionReference());
-        log.info("Paystack get transaction status response {} ", responseString);
-        ensureSuccessResponse(responseString.getStatusCode(), "Failed to get transaction status");
-
-        PaystackTransactionStatusResponse responseBody = null;
         try {
-            responseBody = new ObjectMapper().readValue(responseString.getBody(), PaystackTransactionStatusResponse.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+            ResponseEntity<String> responseString =
+                    template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
+                            requestEntity, String.class, transactionLog.getTransactionReference());
+            log.info("Paystack get transaction status response {} ", responseString);
+            ensureSuccessResponse(responseString.getStatusCode(), "Failed to get transaction status");
 
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
-            PaystackTransactionStatusData data = responseBody.getData();
-            if (data != null) {
-                transactionLog.setStatus(data.getStatus());
-                transactionLog = transactionLogService.save(transactionLog);
-                return DtoTransformer.transformToStatusResponse(transactionLog);
+            PaystackTransactionStatusResponse responseBody = null;
+
+            responseBody = new ObjectMapper().readValue(responseString.getBody(), PaystackTransactionStatusResponse.class);
+
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
+                PaystackTransactionStatusData data = responseBody.getData();
+                if (data != null) {
+                    transactionLog.setStatus(data.getStatus());
+                    transactionLog = transactionLogService.save(transactionLog);
+                    return DtoTransformer.transformToStatusResponse(transactionLog);
+                }
+            } else {
+                throw new GenericException(responseBody.getMessage());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GenericException(e.getMessage());
         }
-        throw new GenericException(responseBody.getMessage());
+        throw new GenericException("Failed to process request");
     }
 
     @Transactional
@@ -125,26 +138,31 @@ public class PaystackApiClient {
                 transactionLog.getNarration());
         HttpEntity<InitiateTransferRequest> requestEntity = new HttpEntity<>(transferRequest, getHeaders());
         log.info("initiateTransfer entity {}", requestEntity);
-        ResponseEntity<InitiateTransferResponse> response = template.exchange(buildUrl(properties.getTransfer()),
-                HttpMethod.POST, requestEntity, InitiateTransferResponse.class);
+        try {
+            ResponseEntity<InitiateTransferResponse> response = template.exchange(buildUrl(properties.getTransfer()),
+                    HttpMethod.POST, requestEntity, InitiateTransferResponse.class);
 
-        log.info("Paystack initiate transfer response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to initiate transfer");
+            log.info("Paystack initiate transfer response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to initiate transfer");
 
-        InitiateTransferResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
-            InitiateTransferData data = responseBody.getData();
-            if (data != null) {
-                finalTransactionLogUpdate(transactionLog, data);
-                BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(transactionLog, data);
-                if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
-                    postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse );
+            InitiateTransferResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if (Boolean.TRUE.equals(responseBody.getStatus())) {
+                InitiateTransferData data = responseBody.getData();
+                if (data != null) {
+                    finalTransactionLogUpdate(transactionLog, data);
+                    BankTransferResponse transferResponse = DtoTransformer.transformToBankTransferResponse(transactionLog, data);
+                    if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
+                        postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse);
+                    }
                 }
             }
-        }
-        throw new GenericException(responseBody.getMessage());
+            throw new GenericException(responseBody.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        throw new GenericException(e.getMessage());
+    }
     }
 
     @Async("taskExecutor")

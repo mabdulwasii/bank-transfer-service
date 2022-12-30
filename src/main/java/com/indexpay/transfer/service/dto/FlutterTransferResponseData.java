@@ -27,7 +27,6 @@ import lombok.ToString;
 })
 @ToString
 public class FlutterTransferResponseData {
-
     @JsonProperty("id")
     private Integer id;
     @JsonProperty("account_number")
@@ -43,9 +42,9 @@ public class FlutterTransferResponseData {
     @JsonProperty("debit_currency")
     private String debitCurrency;
     @JsonProperty("amount")
-    private Integer amount;
+    private double amount;
     @JsonProperty("fee")
-    private Integer fee;
+    private double fee;
     @JsonProperty("status")
     private String status;
     @JsonProperty("reference")
@@ -134,22 +133,22 @@ public class FlutterTransferResponseData {
     }
 
     @JsonProperty("amount")
-    public Integer getAmount() {
+    public double getAmount() {
         return amount;
     }
 
     @JsonProperty("amount")
-    public void setAmount(Integer amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 
     @JsonProperty("fee")
-    public Integer getFee() {
+    public double getFee() {
         return fee;
     }
 
     @JsonProperty("fee")
-    public void setFee(Integer fee) {
+    public void setFee(double fee) {
         this.fee = fee;
     }
 

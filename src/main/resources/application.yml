@@ -52,6 +52,6 @@ api:
     getBanks: /banks/NG
     validateAccount: /bank/resolve?account_number={account_number}&bank_code={bank_code}
     transferRecipient: /transferrecipient
-    transfer: /transfer
+    transfer: /transfers
     verifyTransfer: /transactions/{id}/verify
     secretKey: FLWSECK_TEST-97764a6f0d8635e314c191358a8e178e-X

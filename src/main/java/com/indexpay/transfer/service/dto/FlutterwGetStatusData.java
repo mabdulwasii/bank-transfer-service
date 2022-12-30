@@ -3,6 +3,7 @@ package com.indexpay.transfer.service.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 import lombok.ToString;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,6 +31,7 @@ import lombok.ToString;
         "customer"
 })
 @ToString
+@Data
 public class FlutterwGetStatusData {
 
     @JsonProperty("id")

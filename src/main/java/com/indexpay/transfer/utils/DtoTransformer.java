@@ -79,7 +79,7 @@ public class DtoTransformer {
                 .beneficiaryAccountName(request.getBeneficiaryAccountName())
                 .transactionDateTime(LocalDateTime.now().toString())
                 .transactionReference(request.getTransactionReference())
-                .status(Status.CREATED.name())
+                .status(Status.PENDING.name())
                 .build();
     }
 

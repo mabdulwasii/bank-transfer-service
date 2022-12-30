@@ -36,18 +36,22 @@ public class FlutterWaveClient {
     public List<BankDto> getBanks() {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
-        ResponseEntity<FlutterGetBankApiResponse> response =
-                template.exchange(buildUrl(properties.getGetBanks()), HttpMethod.GET,
-                        requestEntity, FlutterGetBankApiResponse.class);
-        log.info("flutter get bank list response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to retrieve list of banks");
-        FlutterGetBankApiResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if ("success".equalsIgnoreCase(responseBody.getStatus())) {
-            return DtoTransformer.transformToFlutterBankDto(responseBody.getData());
-        } else {
-            throw new GenericException(responseBody.getMessage());
+        try {
+            ResponseEntity<FlutterGetBankApiResponse> response =
+                    template.exchange(buildUrl(properties.getGetBanks()), HttpMethod.GET,
+                            requestEntity, FlutterGetBankApiResponse.class);
+            log.info("flutter get bank list response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to retrieve list of banks");
+            FlutterGetBankApiResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if ("success".equalsIgnoreCase(responseBody.getStatus())) {
+                return DtoTransformer.transformToFlutterBankDto(responseBody.getData());
+            } else {
+                throw new GenericException(responseBody.getMessage());
+            }
+        }catch (Exception e) {
+            throw new GenericException(e.getMessage());
         }
     }
 
@@ -67,49 +71,57 @@ public class FlutterWaveClient {
 
         HttpEntity<FlutterTransferData> requestEntity = new HttpEntity<>(transferRequest, getHeaders());
         log.info("initiateTransfer entity {}", requestEntity);
-        ResponseEntity<FlutterTransferResponse> response = template.exchange(buildUrl(properties.getTransfer()),
-                HttpMethod.POST, requestEntity, FlutterTransferResponse.class);
+        try {
+            ResponseEntity<FlutterTransferResponse> response = template.exchange(buildUrl(properties.getTransfer()),
+                    HttpMethod.POST, requestEntity, FlutterTransferResponse.class);
 
-        log.info("Flutter transfer response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to initiate transfer");
+            log.info("Flutter transfer response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to initiate transfer");
 
-        FlutterTransferResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if (ResponseCode.SUCCESS.getDescription().equalsIgnoreCase(responseBody.getStatus())) {
-            FlutterTransferResponseData data = responseBody.getData();
-            if (data != null) {
-                finalTransactionLogUpdate(transactionLog, data);
-                BankTransferResponse transferResponse = DtoTransformer.transformToFlutterBankTransferResponse(transactionLog, data);
-                if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
-                    postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse);
+            FlutterTransferResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if (ResponseCode.SUCCESS.getDescription().equalsIgnoreCase(responseBody.getStatus())) {
+                FlutterTransferResponseData data = responseBody.getData();
+                if (data != null) {
+                    finalTransactionLogUpdate(transactionLog, data);
+                    BankTransferResponse transferResponse = DtoTransformer.transformToFlutterBankTransferResponse(transactionLog, data);
+                    if (StringUtils.hasText(transactionLog.getCallBackUrl())) {
+                        postToCallBackUrl(transactionLog.getCallBackUrl(), transferResponse);
+                    }
                 }
             }
+        }catch (Exception e) {
+            throw new GenericException(e.getMessage());
         }
-        throw new GenericException(responseBody.getMessage());
     }
 
     @Transactional
     public GetTransactionStatusResponse getTransactionStatus(TransactionLog transactionLog) {
         HttpEntity<Object> requestEntity = new HttpEntity<>(getHeaders());
         log.info("Request entity {}", requestEntity);
-        ResponseEntity<FlutterGetStatusResponse> response =
-                template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
-                        requestEntity, FlutterGetStatusResponse.class, transactionLog.getTransactionReference());
-        log.info("flutter get transaction status response {} ", response);
-        ensureSuccessResponse(response.getStatusCode(), "Failed to get transaction status");
-        FlutterGetStatusResponse responseBody = response.getBody();
-        if (responseBody == null) {
-            throw new GenericException("Failed to retrieve list of banks");
-        } else if ("success".equalsIgnoreCase(responseBody.getStatus())) {
-            FlutterwGetStatusData data = responseBody.getData();
-            if (data != null) {
-                transactionLog.setStatus(data.getStatus());
-                transactionLog = transactionLogService.save(transactionLog);
-                return DtoTransformer.transformToStatusResponse(transactionLog);
+        try {
+            ResponseEntity<FlutterGetStatusResponse> response =
+                    template.exchange(buildUrl(properties.getVerifyTransfer()), HttpMethod.GET,
+                            requestEntity, FlutterGetStatusResponse.class, transactionLog.getTransactionReference());
+            log.info("flutter get transaction status response {} ", response);
+            ensureSuccessResponse(response.getStatusCode(), "Failed to get transaction status");
+            FlutterGetStatusResponse responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new GenericException("Failed to retrieve list of banks");
+            } else if ("success".equalsIgnoreCase(responseBody.getStatus())) {
+                FlutterwGetStatusData data = responseBody.getData();
+                if (data != null) {
+                    transactionLog.setStatus(data.getStatus());
+                    transactionLog = transactionLogService.save(transactionLog);
+                    return DtoTransformer.transformToStatusResponse(transactionLog);
+                }
             }
+        }catch (Exception e) {
+            throw new GenericException(e.getMessage());
         }
-        throw new GenericException(responseBody.getMessage());
+        throw new GenericException("Failed to process request");
+
     }
 
     private String buildUrl(String path) {

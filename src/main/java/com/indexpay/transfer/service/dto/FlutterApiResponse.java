@@ -13,7 +13,6 @@ import lombok.ToString;
 })
 @ToString
 public class FlutterApiResponse {
-
     @JsonProperty("status")
     private String status;
     @JsonProperty("message")
