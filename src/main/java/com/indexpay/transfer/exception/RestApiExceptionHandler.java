@@ -304,6 +304,14 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(NonUniqueReferenceException.class)
+    protected ResponseEntity<Object> handleNonUniqueReferenceException(NonUniqueReferenceException ex, WebRequest request) {
+        log.error("handleNonUniqueReferenceException ", ex);
+        return buildResponseEntity(ResponseCode.ERROR.getCode(),
+                ex.getMessage(), HttpStatus.BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler(InvalidEnumException.class)
     protected ResponseEntity<Object> handleInvalidEnumException(
             InvalidEnumException ex, WebRequest request) {
